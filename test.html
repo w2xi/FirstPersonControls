@@ -16,39 +16,50 @@
 	<script>
 		let scene, camera, renderer, controls, cube
 
-		scene = new THREE.Scene()
-		scene.background = new THREE.Color(0xf5f5f5)
+		init()
+		render()
+		window.addEventListener('resize', onResize, false)
 
-		scene.add(new THREE.AxesHelper(40))
+		const box = addBox()
+		box.position.x = 20
+		box.material.color.set(0xaa8989)
 
-		camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-		camera.position.set(40, 40, 40)
-		camera.lookAt(0, 0, 0)
+		function init()
+		{
+			scene = new THREE.Scene()
+			scene.background = new THREE.Color(0xf5f5f5)
 
-		renderer = new THREE.WebGLRenderer()
-		renderer.setSize(window.innerWidth, window.innerHeight)
-		document.body.appendChild(renderer.domElement)
+			scene.add(new THREE.AxesHelper(40))
 
-		controls = new THREE.OrbitControls(camera, renderer.domElement)
-	    controls.enablePan = true
-	    controls.enableDamping = true
+			camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+			camera.position.set(40, 40, 40)
+			camera.lookAt(0, 0, 0)
 
-		const cubeGeometry = new THREE.BoxGeometry(10, 10, 10)
-		const cubeMaterial = new THREE.MeshBasicMaterial({
-			color: 0xaaaaaa,
-		})
+			renderer = new THREE.WebGLRenderer()
+			renderer.setSize(window.innerWidth, window.innerHeight)
+			document.body.appendChild(renderer.domElement)
 
-		cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
+			controls = new THREE.OrbitControls(camera, renderer.domElement)
+		    controls.enablePan = true
+		    controls.enableDamping = true
 
-		// Euler rotation
-		console.log(cube.rotation)
+		    {
+				const cubeGeometry = new THREE.BoxGeometry(10, 10, 10)
+				const cubeMaterial = new THREE.MeshBasicMaterial({
+					color: 0xaaaaaa,
+				})
+				
+				cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
+			}
 
-		cube.rotation.x = Math.PI / 4
-		cube.rotation.y = Math.PI / 4
+			// Euler rotation
+			console.log(cube.rotation)
 
-		console.log(cube.rotation)
+			cube.rotation.x = Math.PI / 4
+			cube.rotation.y = Math.PI / 4
 
-		scene.add(cube)
+			scene.add(cube)
+		}
 
 		function render()
 		{
@@ -57,7 +68,29 @@
 			controls.update()
 		} 
 
-		render()
+		function onResize(event)
+		{
+			const w = window.innerWidth
+			const h = window.innerHeight
+
+			camera.aspect = w / h
+			camera.updateProjectionMatrix()
+
+			renderer.setSize(w, h)
+		}
+
+
+		function addBox()
+		{
+			const geometry = new THREE.BoxGeometry(10, 10, 10)
+			const material = new THREE.MeshBasicMaterial({ color: 0x676767 })
+
+			const mesh = new THREE.Mesh(geometry, material)
+
+			scene.add(mesh)
+
+			return mesh 
+		}
 	</script>
 </body>
 </html>
