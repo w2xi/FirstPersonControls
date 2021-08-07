@@ -76,7 +76,7 @@
 
 
 		// Object:Plane
-		let PlaneGeometry1 = new THREE.PlaneGeometry(10, 10);
+		let PlaneGeometry1 = new THREE.PlaneGeometry(30, 30);
 		let PlaneMaterial1 = new THREE.MeshPhongMaterial({ color: "white", wireframe: false });
 		let Plane1 = new THREE.Mesh(PlaneGeometry1, PlaneMaterial1);
 
@@ -87,7 +87,7 @@
 		scene.add(Plane1);
 
 		// Object:Light:1
-		let light1 = new THREE.PointLight("white", .8);
+		let light1 = new THREE.PointLight("white", 1);
 		light1.position.set(0, 3, 0);
 		light1.castShadow = true;
 		light1.shadow.camera.near = 2.5;

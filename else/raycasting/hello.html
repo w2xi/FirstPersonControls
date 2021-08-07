@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Interactive / raycasting / cube</title>
+	<link rel="stylesheet" href="../../assets/styles/default.css" />	
+	<script src="../../libs/three/three.js"></script>
+</head>
+<body>
+	<script>
+		let scene, camera, renderer, controls, boxGroup
+		let previousBox = null
+		let previousBoxColor = null
+
+		const raycaster = new THREE.Raycaster()
+		const mouse = new THREE.Vector2()
+
+		init()
+		render()
+		window.addEventListener('resize', onResize, false)
+		window.addEventListener('mousemove', onMouseMove, false)
+
+		for ( let i = 0; i < 1000; i++ ){
+			const box = addBox()
+
+			box.position.x = Math.random() * 100 * ( Math.random() - 0.5 > 0 ? 1 : -1 )
+			box.position.y = Math.random() * 100 * ( Math.random() - 0.5 > 0 ? 1 : -1 )
+			box.position.z = Math.random() * 100 * ( Math.random() - 0.5 > 0 ? 1 : -1 )
+
+			boxGroup.add(box)
+		}
+
+		function init()
+		{
+			scene = new THREE.Scene()
+			scene.background = new THREE.Color(0xf5f5f5)
+
+			camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+			camera.position.set(40, 40, 40)
+			camera.lookAt(0, 0, 0)
+
+			renderer = new THREE.WebGLRenderer()
+			renderer.setSize(window.innerWidth, window.innerHeight)
+			document.body.appendChild(renderer.domElement)
+
+			boxGroup = new THREE.Group()
+			scene.add(boxGroup)
+		}
+
+		function render()
+		{
+			// 通过摄像机和鼠标位置更新射线
+			raycaster.setFromCamera( mouse, camera );
+
+			// 计算物体和射线的焦点
+			const intersects = raycaster.intersectObjects( boxGroup.children );
+
+			if ( intersects.length > 0 ){
+				if ( previousBox ){
+					previousBox.material.color = previousBoxColor
+				}
+
+				const box = intersects[0].object
+
+				previousBox = box
+				previousBoxColor = box.material.clone().color
+
+				box.material.color = new THREE.Color(0xff0000)
+			}else{
+				if ( previousBox ){
+					previousBox.material.color = previousBoxColor
+
+					previousBox = null
+					previousBoxColor = null
+				}
+			}
+
+			boxGroup.rotation.x += 0.002
+			boxGroup.rotation.z += 0.002
+
+			window.requestAnimationFrame(render)
+			renderer.render(scene, camera)
+		} 
+
+		function onResize(event)
+		{
+			const w = window.innerWidth
+			const h = window.innerHeight
+
+			camera.aspect = w / h
+			camera.updateProjectionMatrix()
+
+			renderer.setSize(w, h)
+		}
+
+		function onMouseMove(event)
+		{
+			// 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
+
+			mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1
+			mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1
+		}
+
+		function addBox()
+		{
+			const radius = Math.random() * 10
+			const geometry = new THREE.BoxGeometry(radius, radius, radius)
+			// 0x000000 ~ 0xffffff
+			const hex = ~~ ( Math.random() * 0xffffff )
+			const material = new THREE.MeshBasicMaterial({ color: hex })
+
+			const mesh = new THREE.Mesh(geometry, material)
+
+			return mesh 
+		}
+	</script>
+</body>
+</html>
