@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Curve Plane</title>
+	<link rel="stylesheet" href="../../assets/styles/default.css" />	
+	<script src="../../vendor/three/three.js"></script>
+	<script src="../../vendor/three/libs/stats.min.js"></script>
+	<script src="../../vendor/three/controls/OrbitControls.js"></script>
+	<script src="../Base.js"></script>
+</head>
+<body>
+	<script>
+		const { three } = new Base()
+
+		const { scene, camera } = three
+
+		const axes = new THREE.AxesHelper(40)
+		axes.position.y++
+
+		scene.add(axes)
+		scene.add(new THREE.GridHelper(1000, 100))
+
+		const points = []
+
+		for ( let i = 0; i < 20; i++ )
+		{
+			// points.push(new THREE.Vector3(...[i, 0, 5 * Math.sqrt(i)]))
+
+			points.push(new THREE.Vector3(...[i, 0, i*i*i/64]))
+		}
+
+		//创建管道成型的路径(3D样条曲线)
+		var path = new THREE.CatmullRomCurve3(points);
+		// path:路径   40：沿着轨迹细分数  2：管道半径   25：管道截面圆细分数
+		var geometry = new THREE.TubeGeometry(path, 40, 1, 25);
+		var material = new THREE.MeshPhongMaterial({ color: 0xf0f0f0 })
+
+		var mesh = new THREE.Mesh(geometry, material)
+
+		console.log(mesh)
+
+		scene.add(mesh)
+	</script>
+</body>
+</html>

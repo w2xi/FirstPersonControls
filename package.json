@@ -1,0 +1,25 @@
+{
+  "name": "learning-threejs-demo",
+  "version": "1.0.0",
+  "description": "learning threejs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/w2xi/learning-three.git"
+  },
+  "keywords": [
+    "three.js"
+  ],
+  "author": "w2xi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/w2xi/learning-three/issues"
+  },
+  "homepage": "https://github.com/w2xi/learning-three#readme",
+  "dependencies": {
+    "three": "^0.131.3"
+  }
+}
