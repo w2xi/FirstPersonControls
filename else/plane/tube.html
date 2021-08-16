@@ -5,43 +5,69 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Curve Plane</title>
 	<link rel="stylesheet" href="../../assets/styles/default.css" />	
-	<script src="../../vendor/three/three.js"></script>
-	<script src="../../vendor/three/libs/stats.min.js"></script>
-	<script src="../../vendor/three/controls/OrbitControls.js"></script>
+	<script src="../../vendor/three/build/three.js"></script>
+	<script src="../../vendor/three/examples/js/libs/stats.min.js"></script>
+	<script src="../../vendor/three/examples/js/controls/OrbitControls.js"></script>
+	<script src="../../vendor/three/examples/js/loaders/GLTFLoader.js"></script>
 	<script src="../../assets/js/Base.js"></script>
+	<script src="../../assets/js/functions.js"></script>
 </head>
 <body>
 	<script>
-		const { three } = new Base()
+		(async function(){
+			const { three } = new Base()
+			const { scene, camera } = three
 
-		const { scene, camera } = three
+			const axes = new THREE.AxesHelper(40)
+			axes.position.y += 1
 
-		const axes = new THREE.AxesHelper(40)
-		axes.position.y++
+			scene.add(axes)
+			scene.add(new THREE.GridHelper(1000, 100))
 
-		scene.add(axes)
-		scene.add(new THREE.GridHelper(1000, 100))
+			// load truck
+			const { scene: root } = await loadAsyncGLTF('../../assets/gltf/small-truck.gltf')
+			root.scale.set(0.09, 0.07, 0.07)
+			root.children[0].position.y = 20
 
-		const points = []
+			scene.add(root)
 
-		for ( let i = 0; i < 20; i++ )
-		{
-			// points.push(new THREE.Vector3(...[i, 0, 5 * Math.sqrt(i)]))
+			const points = []
 
-			points.push(new THREE.Vector3(...[i, 0, i*i*i/64]))
-		}
+			for ( let i = -60; i < 60; i++ )
+			{
+				points.push(new THREE.Vector3(...[i, 0, i*i/64]))
+			}
 
-		//创建管道成型的路径(3D样条曲线)
-		var path = new THREE.CatmullRomCurve3(points);
-		// path:路径   40：沿着轨迹细分数  2：管道半径   25：管道截面圆细分数
-		var geometry = new THREE.TubeGeometry(path, 40, 1, 25);
-		var material = new THREE.MeshPhongMaterial({ color: 0xf0f0f0 })
+			//创建管道成型的路径(3D样条曲线)
+			const path = new THREE.CatmullRomCurve3(points);
+			// path:路径   40：沿着轨迹细分数  2：管道半径   25：管道截面圆细分数
+			const geometry = new THREE.TubeGeometry(path, 40, 1, 25);
+			const material = new THREE.MeshPhongMaterial({ color: 0xf0f0f0 })
 
-		var mesh = new THREE.Mesh(geometry, material)
+			const mesh = new THREE.Mesh(geometry, material)
 
-		console.log(mesh)
+			scene.add(mesh)
 
-		scene.add(mesh)
+			let progress = 0
+			let speed = 0.001
+
+			setInterval(() => {
+				if ( progress >= 1 ){
+					progress = 0
+					return 
+				}
+
+				progress += speed
+
+				const currentPoint = path.getPoint(progress)
+				const nextPoint = path.getPoint(progress + speed)
+
+				if ( currentPoint && currentPoint.x ){
+					root.position.set(currentPoint.x, currentPoint.y, currentPoint.z)
+					root.lookAt(nextPoint.x, nextPoint.y, nextPoint.z)
+				}
+			}, 16)
+		})()
 	</script>
 </body>
 </html>
