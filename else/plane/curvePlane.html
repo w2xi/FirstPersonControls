@@ -7,9 +7,9 @@
 	<script src="https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.js"></script>
 	<!-- <script src="https://cdn.bootcdn.net/ajax/libs/three.js/r124/three.js"></script> -->
 	<!-- <script src="../vendor/three/examples/js/deprecated/Geometry.js"></script> -->
-	<script src="../vendor/three/examples/js/controls/OrbitControls.js"></script>
-	<script src="../vendor/three/examples/js/loaders/GLTFLoader.js"></script>
-	<script src="../assets/js/functions.js"></script>
+	<script src="../../vendor/three/examples/js/controls/OrbitControls.js"></script>
+	<script src="../../vendor/three/examples/js/loaders/GLTFLoader.js"></script>
+	<script src="../../assets/js/functions.js"></script>
 	<style>
 		body {
 			margin: 0; padding: 0;
@@ -36,14 +36,14 @@
 
 			for ( let i = -30; i < 30; i++ )
 	    {
-	    	points.push(new THREE.Vector3(i, 0, i * i / 16))
+	    	points.push(new THREE.Vector3(i, 0, i * i / 32))
 	    }
 
 			const geometry = new THREE.BufferGeometry().setFromPoints(points)
 			const material = new THREE.LineBasicMaterial({ color: 0xff0000 })
 			const mesh = new THREE.Line(geometry, material)
 
-			mesh.position.y = 1
+			mesh.position.y = 10
 
 			scene.add(mesh)		    
 		}
@@ -95,7 +95,7 @@
 
 		    for ( let i = -30; i < 30; i++ )
 		    {
-		    	dummyPoints.push(new THREE.Vector3(i, 0, i * i / 64))
+		    	dummyPoints.push(new THREE.Vector3(i, 0, i * i / 32))
 		    }
 
 		    //Create a closed wavey loop
@@ -103,14 +103,12 @@
 
 		    var material = new THREE.MeshBasicMaterial({ 
 		    	// vertexColors: THREE.FaceColors, 
-		    	side: THREE.DoubleSide,
+		    	// side: THREE.DoubleSide,
 		    	color: 0xff0000,
 		    });
 
 		    //create a triangular geometry
-		    var points = curve.getPoints(1000);
-
-		    console.log(points)
+		    var points = curve.getPoints(100);
 
 		    var roadPoints = [];
 
