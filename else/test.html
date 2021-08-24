@@ -5,10 +5,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Test</title>
 	<script src="https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.js"></script>
-	<!-- <script src="https://cdn.bootcdn.net/ajax/libs/three.js/r124/three.js"></script> -->
-	<!-- <script src="../vendor/three/examples/js/deprecated/Geometry.js"></script> -->
 	<script src="../vendor/three/examples/js/controls/OrbitControls.js"></script>
 	<script src="../vendor/three/examples/js/loaders/GLTFLoader.js"></script>
+	<script src="../assets/js/Base.js"></script>
 	<script src="../assets/js/functions.js"></script>
 	<style>
 		body {
@@ -18,181 +17,84 @@
 </head>
 <body>
 	<script>
-		var scene, camera, renderer;
-		var cube;
-		var controls;
+		const base = new Base()
+		const { scene, camera } = base.three
 
-		initScene();
-		draw();
-		render();
+		base.addAxes()
+		base.addGrid()
 
 		{
-			scene.add(new THREE.AxesHelper(35))
-			scene.add(new THREE.GridHelper(1000, 100))
+			const geometry = new THREE.SphereGeometry( 5, 32, 16 );
+			const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+			const sphere = new THREE.Mesh( geometry, material );
+
+			sphere.position.y = 5 / 2 + 20 / 2 + 8
+
+			scene.add( sphere );	
 		}
 
 		{
-			const points = []
+			const geometry = new THREE.CylinderGeometry(5, 5, 20, 16)
+			const material = new THREE.MeshBasicMaterial()
+			const cylinder = new THREE.Mesh(geometry, material)
 
-			for ( let i = -30; i < 30; i++ )
-	    {
-	    	points.push(new THREE.Vector3(i, 0, i * i / 16))
-	    }
-
-			const geometry = new THREE.BufferGeometry().setFromPoints(points)
-			const material = new THREE.LineBasicMaterial({ color: 0xff0000 })
-			const mesh = new THREE.Line(geometry, material)
-
-			mesh.position.y = 1
-
-			scene.add(mesh)		    
+			scene.add(cylinder)			
 		}
 
-		function initScene() {
-		    scene = new THREE.Scene();
-		    scene.position.set(0, 0, 0)
+		{
+			const geometry = new THREE.CylinderGeometry(2, 2, 8, 16)
+			const material = new THREE.MeshBasicMaterial({ color: 'red' })
+			const cylinder = new THREE.Mesh(geometry, material)
 
-		    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+			cylinder.position.y = 2 / 2 + 20 / 2  
 
-		    camera.position.set(40, 40, -40)
-		    camera.lookAt(scene.position)
-
-		    renderer = new THREE.WebGLRenderer({ 
-		    	alpha: true,
-		    	antialias: true,
-		    });
-		    renderer.setSize(window.innerWidth, window.innerHeight);
-
-		    document.body.appendChild(renderer.domElement);
-
-		    controls = new THREE.OrbitControls(camera, renderer.domElement);
-		    controls.update();
-
-		    const ambient = new THREE.AmbientLight(0xffffff)
-		    scene.add(ambient)
-
-		    const direction = new THREE.DirectionalLight(0xffffff, 2)
-		    direction.position.set(40, 40, 40)
-		    scene.add(direction)
+			scene.add(cylinder)			
 		}
 
-		function render() {
-		    requestAnimationFrame(render);
+		{
+			const geometry = new THREE.CylinderGeometry(2, 2, 15, 16)
+			const material = new THREE.MeshBasicMaterial({ color: 'green' })
+			const cylinder = new THREE.Mesh(geometry, material)
 
-		    renderer.render(scene, camera);
+			cylinder.rotation.z = Math.PI / 4
+			cylinder.position.y = 3
+			cylinder.position.x = 8
+
+			scene.add(cylinder)			
 		}
 
-		function draw() {
-		    var dummyPoints = [
-		        new THREE.Vector3(-10, 0, 10),
-		        new THREE.Vector3(-5, 5, 5),
-		        new THREE.Vector3(0, 0, 0),
-		        new THREE.Vector3(5, -5, 5),
-		        new THREE.Vector3(10, 0, 10)
-		    ];
+		{
+			const geometry = new THREE.CylinderGeometry(2, 2, 15, 16)
+			const material = new THREE.MeshBasicMaterial({ color: 'green' })
+			const cylinder = new THREE.Mesh(geometry, material)
 
-		    dummyPoints = []
+			cylinder.rotation.z = -Math.PI / 4
+			cylinder.position.y = 3
+			cylinder.position.x = -8
 
-		    for ( let i = -30; i < 30; i++ )
-		    {
-		    	dummyPoints.push(new THREE.Vector3(i, 0, i * i / 64))
-		    }
-
-		    //Create a closed wavey loop
-		    var curve = new THREE.CatmullRomCurve3(dummyPoints);
-
-		    var material = new THREE.MeshBasicMaterial({ 
-		    	// vertexColors: THREE.FaceColors, 
-		    	side: THREE.DoubleSide,
-		    	color: 0xff0000,
-		    });
-
-		    //create a triangular geometry
-		    var points = curve.getPoints(1000);
-
-		    console.log(points)
-
-		    var roadPoints = [];
-
-		    var length = points.length;
-
-		    for (var i = 0; i < length - 1; i++) {
-		        roadPoints = roadPoints.concat(extractRoadPoint(points[i], points[i + 1]));
-		    }
-
-		    roadPoints = roadPoints.concat(extractRoadPoint(points[length - 1], points[length - 2]));
-		    var geometry = new THREE.BufferGeometry().setFromPoints(roadPoints);
-
-		    // var face = new THREE.Face3(0, 1, 2);
-		    //add the face to the geometry's faces array
-		    // geometry.faces.push(face);
-
-		    // for (var i = 0; i < roadPoints.length - 2; i++) {
-		    //     var face = new THREE.Face3(i, i + 1, i + 2);
-		    //     geometry.faces.push(face);
-		    //     face.color.set(new THREE.Color(Math.random() * 0xffffff - 1));
-		    //     // face.color.set(new THREE.Color(0xcccccc));
-		    // }
-
-		    //the face normals and vertex normals can be calculated automatically if not supplied above
-		    // geometry.computeFaceNormals();
-		    geometry.computeVertexNormals();
-
-		    scene.add(new THREE.Mesh(geometry, material));
+			scene.add(cylinder)			
 		}
 
-		function extractRoadPoint(point1, point2) {
-		    var result = [];
+		{
+			const geometry = new THREE.CylinderGeometry(1, 1, 20, 16)
+			const material = new THREE.MeshBasicMaterial({ color: 'skyblue' })
+			const cylinder = new THREE.Mesh(geometry, material)
 
-		    var vector = {
-		        x: point2.x - point1.x,
-		        y: point2.y - point1.y,
-		        z: point2.z - point1.z,
-		    }
+			cylinder.position.y = -20
+			cylinder.position.x = 2
 
-		    var uOxz = {
-		        x: 0,
-		        y: 1,
-		        z: 0
-		    };
+			scene.add(cylinder)			
+		}
 
-		    var vectorVertices = {
-		        x: vector.y * uOxz.z - vector.z * uOxz.y,
-		        y: vector.z * uOxz.x - vector.x * uOxz.z,
-		        z: vector.x * uOxz.y - vector.y * uOxz.x,
-		    };
+		{
+			const geometry = new THREE.CylinderGeometry(1, 1, 20, 16)
+			const material = new THREE.MeshBasicMaterial({ color: 'skyblue' })
+			const cylinder = new THREE.Mesh(geometry, material)
 
-		    var t = Math.sqrt(1 * 1 / (vectorVertices.x * vectorVertices.x + vectorVertices.y * vectorVertices.y + vectorVertices.z * vectorVertices.z));
+			cylinder.position.y = -20
+			cylinder.position.x = -2
 
-		    var sidePoint11 = {
-		        x: point1.x + vectorVertices.x * t,
-		        y: point1.y + vectorVertices.y * t,
-		        z: point1.z + vectorVertices.z * t,
-		    }
-
-		    var sidePoint12 = {
-		        x: point1.x - vectorVertices.x * t,
-		        y: point1.y - vectorVertices.y * t,
-		        z: point1.z - vectorVertices.z * t,
-		    }
-
-		    var sidePoint21 = {
-		        x: point2.x + vectorVertices.x * t,
-		        y: point2.y + vectorVertices.y * t,
-		        z: point2.z + vectorVertices.z * t,
-		    }
-
-		    var sidePoint22 = {
-		        x: point2.x - vectorVertices.x * t,
-		        y: point2.y - vectorVertices.y * t,
-		        z: point2.z - vectorVertices.z * t,
-		    }
-
-		    // return [sidePoint11, sidePoint12, sidePoint21, sidePoint22];
-		    return [
-		    	sidePoint22, sidePoint12, sidePoint11,
-		    	sidePoint11, sidePoint21, sidePoint22,
-		    ]
+			scene.add(cylinder)			
 		}
 	</script>
 </body>

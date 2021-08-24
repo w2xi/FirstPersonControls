@@ -4,9 +4,9 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Test</title>
-	<script src="https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.js"></script>
-	<!-- <script src="https://cdn.bootcdn.net/ajax/libs/three.js/r124/three.js"></script> -->
-	<!-- <script src="../vendor/three/examples/js/deprecated/Geometry.js"></script> -->
+	<!-- <script src="https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.js"></script> -->
+	<script src="https://cdn.bootcdn.net/ajax/libs/three.js/r124/three.js"></script>
+	<script src="../../vendor/three/examples/js/deprecated/Geometry.js"></script>
 	<script src="../../vendor/three/examples/js/controls/OrbitControls.js"></script>
 	<script src="../../vendor/three/examples/js/loaders/GLTFLoader.js"></script>
 	<script src="../../assets/js/functions.js"></script>
@@ -27,8 +27,11 @@
 		render();
 
 		{
-			scene.add(new THREE.AxesHelper(35))
-			scene.add(new THREE.GridHelper(1000, 100))
+			const axes = new THREE.AxesHelper(35)
+			axes.position.y = 1
+
+			scene.add(axes)
+			// scene.add(new THREE.GridHelper(1000, 100))
 		}
 
 		{
@@ -50,11 +53,13 @@
 
 		function initScene() {
 		    scene = new THREE.Scene();
+		    scene.background = new THREE.Color(0x303555)
+		    scene.fog = new THREE.FogExp2(0x252b58, 0.005)
 		    scene.position.set(0, 0, 0)
 
-		    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+		    camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 5, 350)
 
-		    camera.position.set(40, 40, -40)
+		    camera.position.set(1, 90, -80)
 		    camera.lookAt(scene.position)
 
 		    renderer = new THREE.WebGLRenderer({ 
@@ -95,7 +100,7 @@
 
 		    for ( let i = -30; i < 30; i++ )
 		    {
-		    	dummyPoints.push(new THREE.Vector3(i, 0, i * i / 32))
+		    	dummyPoints.push(new THREE.Vector3(i, 0, i * i * i / 128))
 		    }
 
 		    //Create a closed wavey loop
@@ -104,7 +109,7 @@
 		    var material = new THREE.MeshBasicMaterial({ 
 		    	// vertexColors: THREE.FaceColors, 
 		    	// side: THREE.DoubleSide,
-		    	color: 0xff0000,
+		    	color: 0xefdd07, // 0xefdd07
 		    });
 
 		    //create a triangular geometry
@@ -118,28 +123,45 @@
 		        roadPoints = roadPoints.concat(extractRoadPoint(points[i], points[i + 1]));
 		    }
 
-		    roadPoints = roadPoints.concat(extractRoadPoint(points[length - 1], points[length - 2]));
+		    let len = roadPoints.length
+
+		    for ( let i = 0; i < len; i += 12 )
+		    {
+		    	roadPoints.splice(i, 12)
+		    }
+
+		    // roadPoints = roadPoints.concat(extractRoadPoint(points[length - 1], points[length - 2])); 
+
 		    var geometry = new THREE.BufferGeometry().setFromPoints(roadPoints);
+		    // var geometry = new THREE.Geometry().setFromPoints(roadPoints)
 
 		    // var face = new THREE.Face3(0, 1, 2);
 		    //add the face to the geometry's faces array
 		    // geometry.faces.push(face);
 
-		    // for (var i = 0; i < roadPoints.length - 2; i++) {
-		    //     var face = new THREE.Face3(i, i + 1, i + 2);
-		    //     geometry.faces.push(face);
-		    //     face.color.set(new THREE.Color(Math.random() * 0xffffff - 1));
-		    //     // face.color.set(new THREE.Color(0xcccccc));
-		    // }
+		    for (var i = 0; i < roadPoints.length - 2; i++) {
+		        // var face = new THREE.Face3(i, i + 1, i + 2);
+		        // geometry.faces.push(face);
+		        // face.color.set(new THREE.Color(Math.random() * 0xffffff - 1));
+		        // face.color.set(new THREE.Color(0xcccccc));
+		    }
 
 		    //the face normals and vertex normals can be calculated automatically if not supplied above
 		    // geometry.computeFaceNormals();
-		    geometry.computeVertexNormals();
+		    // geometry.computeVertexNormals();
 
-		    scene.add(new THREE.Mesh(geometry, material));
+		    const mesh = new THREE.Mesh(geometry, material)
+
+		    scene.add(mesh);
+
+		    const clone = mesh.clone()
+
+		    clone.position.x = 10
+
+		    scene.add(clone)
 		}
 
-		function extractRoadPoint(point1, point2) {
+		function extractRoadPoint(point1, point2, factor = .5) {
 		    var result = [];
 
 		    var vector = {
@@ -161,6 +183,8 @@
 		    };
 
 		    var t = Math.sqrt(1 * 1 / (vectorVertices.x * vectorVertices.x + vectorVertices.y * vectorVertices.y + vectorVertices.z * vectorVertices.z));
+
+		    t *= factor
 
 		    var sidePoint11 = {
 		        x: point1.x + vectorVertices.x * t,

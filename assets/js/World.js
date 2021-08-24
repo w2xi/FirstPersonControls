@@ -1,6 +1,8 @@
-class Base
+class World
 {
-	constructor(){
+	constructor(options = {}){
+		options = options || {}
+
 		this.three = {
 			scene: null,
 			camera: null,
@@ -9,25 +11,32 @@ class Base
 		}
 
 		this.init()
+
+		if ( options.helper ){
+			this.addAxes()
+			this.addGrid()
+		}
+
+		window.addEventListener('resize', this.onWindowResize.bind(this), false)
 	}
 
 	init(){
-		this.addScene()
-		this.addCamera()
-		this.addRenderer()
-		this.addControls()
-		this.addLight()
-		this.animate()
+		this.createScene()
+		this.createCamera()
+		this.createRenderer()
+		this.createControls()
+		this.createLight()
+		this.loop()
 	}
 
-	animate(){
+	loop(){
 		const { scene, camera, renderer } = this.three
 
-		requestAnimationFrame(this.animate.bind(this))
+		requestAnimationFrame(this.loop.bind(this))
 		renderer.render(scene, camera)
 	}
 
-	addScene(){
+	createScene(){
 		const scene = new THREE.Scene()
 		// 0x303555 / 0x252b58
 		scene.background = new THREE.Color(0x303555)
@@ -36,17 +45,17 @@ class Base
 		this.three.scene = scene
 	}
 
-	addCamera(){
+	createCamera(){
 		const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 		
 		camera.position.set(1, 70, -100)
-		camera.lookAt(new THREE.Vector3(0, 0, 0))
+		camera.lookAt(new THREE.Vector3(0	, 0, 0))
 
 		this.three.camera = camera
 		this.three.scene.add(camera)
 	}
 
-	addRenderer(){
+	createRenderer(){
 		const renderer = new THREE.WebGLRenderer({
 			antialias: true,
 			powerPreference: 'high-performance',
@@ -63,27 +72,27 @@ class Base
 		document.body.appendChild(renderer.domElement)
 	}
 
-	addControls(){
+	createControls(){
 		const controls = new THREE.OrbitControls(this.three.camera, this.three.renderer.domElement)
 		
 		controls.update()
-	    // controls.enablePan = true
-	    controls.enableDamping = true
-	    controls.dampingFactor = 0.05
+    // controls.enablePan = true
+    controls.enableDamping = true
+    controls.dampingFactor = 0.05
 
-	    controls.screenSpacePanning = false
+    controls.screenSpacePanning = false
 
-	  //   controls.minDistance = 100
-			// controls.maxDistance = 500
+    // controls.minDistance = 100
+		// controls.maxDistance = 500
 
-	    // controls.maxPolarAngle = Math.PI / 180 * 80
-	    // 为指定的DOM元素添加按键监听 推荐将window作为指定的DOM元素
-	    // controls.listenToKeyEvents( window );
+    // controls.maxPolarAngle = Math.PI / 180 * 80
+    // 为指定的DOM元素添加按键监听 推荐将window作为指定的DOM元素
+    // controls.listenToKeyEvents( window );
 
-	    this.three.controls = controls
+    this.three.controls = controls
 	}
 
-	addLight(){
+	createLight(){
 		// add subtle ambient lighting
 		const ambientLight = new THREE.AmbientLight(0xf5f5f5)
 
@@ -120,6 +129,29 @@ class Base
 		renderer.forceContextLoss()
 
 		controls && controls.dispose()
+	}
+
+	createCube(){
+		const geometry = new THREE.BoxGeometry(10, 10, 10)
+		const material = new THREE.MeshBasicMaterial()
+		const mesh = new THREE.Mesh(geometry, material)
+
+		return mesh
+	}
+
+	addAxes(){
+		const { scene } = this.three
+		const axesHelper = new THREE.AxesHelper(45)
+		axesHelper.position.y = 1
+
+		scene.add(axesHelper)
+	}
+
+	addGrid(){
+		const { scene } = this.three
+		const gridHelper = new THREE.GridHelper(1000, 100)
+
+		scene.add(gridHelper)
 	}
 
 	onWindowResize(){
