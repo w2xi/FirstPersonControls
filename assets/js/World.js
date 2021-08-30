@@ -12,11 +12,6 @@ class World
 
 		this.init()
 
-		if ( options.helper ){
-			this.addAxes()
-			this.addGrid()
-		}
-
 		window.addEventListener('resize', this.onWindowResize.bind(this), false)
 	}
 
@@ -24,15 +19,18 @@ class World
 		this.createScene()
 		this.createCamera()
 		this.createRenderer()
-		this.createControls()
 		this.createLight()
 		this.loop()
 	}
 
 	loop(){
-		const { scene, camera, renderer } = this.three
+		const { scene, camera, renderer, controls, stats } = this.three
 
 		requestAnimationFrame(this.loop.bind(this))
+
+		controls && controls.update()
+		stats && stats.update()
+
 		renderer.render(scene, camera)
 	}
 
@@ -40,7 +38,7 @@ class World
 		const scene = new THREE.Scene()
 		// 0x303555 / 0x252b58
 		scene.background = new THREE.Color(0x303555)
-		scene.fog = new THREE.FogExp2(0x252b58, 0.005)
+		// scene.fog = new THREE.FogExp2(0x252b58, 0.005)
 
 		this.three.scene = scene
 	}
@@ -49,7 +47,7 @@ class World
 		const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 		
 		camera.position.set(1, 70, -100)
-		camera.lookAt(new THREE.Vector3(0	, 0, 0))
+		camera.lookAt(this.three.scene.position)
 
 		this.three.camera = camera
 		this.three.scene.add(camera)
@@ -72,7 +70,7 @@ class World
 		document.body.appendChild(renderer.domElement)
 	}
 
-	createControls(){
+	addControls(){
 		const controls = new THREE.OrbitControls(this.three.camera, this.three.renderer.domElement)
 		
 		controls.update()
@@ -90,6 +88,8 @@ class World
     // controls.listenToKeyEvents( window );
 
     this.three.controls = controls
+
+    return this
 	}
 
 	createLight(){
@@ -105,6 +105,16 @@ class World
 		this.three.scene.add(ambientLight)
 		this.three.scene.add(pointLight)
 		this.three.scene.add(spotLight)
+	}
+
+	addStats(){
+		const stats = new Stats()
+
+		document.body.appendChild(stats.dom)
+
+		this.three.stats = stats
+
+		return this
 	}
 
 	dispose(){
@@ -131,39 +141,58 @@ class World
 		controls && controls.dispose()
 	}
 
-	createCube(){
-		const geometry = new THREE.BoxGeometry(10, 10, 10)
-		const material = new THREE.MeshBasicMaterial()
-		const mesh = new THREE.Mesh(geometry, material)
 
-		return mesh
+	addHelper(){
+		this.addAxesHelper()
+		this.addGridHelper()
 	}
 
-	addAxes(){
+	addAxesHelper(size = 45){
 		const { scene } = this.three
 		const axesHelper = new THREE.AxesHelper(45)
 		axesHelper.position.y = 1
 
 		scene.add(axesHelper)
+
+		return this
 	}
 
-	addGrid(){
+	addGridHelper(){
 		const { scene } = this.three
 		const gridHelper = new THREE.GridHelper(1000, 100)
 
 		scene.add(gridHelper)
+
+		return this
+	}
+
+	createCube(sideLength = 10){
+		const geometry = new THREE.BoxGeometry(sideLength, sideLength, sideLength)
+		const material = new THREE.MeshBasicMaterial()
+		const cube = new THREE.Mesh(geometry, material)
+
+		return cube
+	}
+
+	createSphere(radius = 10){
+		const geometry = new THREE.SphereGeometry(radius, 32, 16)
+		const material = new THREE.MeshBasicMaterial()
+		const sphere = new THREE.Mesh(geometry, material)
+
+		return sphere		
 	}
 
 	onWindowResize(){
+		const { scene, camera, renderer } = this.three
+
 		const width = window.innerWidth
 		const height = window.innerHeight
 
-		const { camera, renderer } = this.three
-
-		renderer.setSize(width, height)
-
 		camera.aspect = width / height
 		camera.updateProjectionMatrix()
+
+		renderer.setSize(width, height)
+		renderer.setPixelRatio(window.devicePixelRatio)
 	}
 }
 
