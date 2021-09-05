@@ -1,8 +1,6 @@
 function init()
 {
-	const world = new World({
-		helper: true,
-	})
+	const world = new World()
 	
 	// translate.call(world)
 	// rotation.call(world)

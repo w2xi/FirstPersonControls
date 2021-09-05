@@ -1,7 +1,11 @@
+const clock = new THREE.Clock()
+
 class World
 {
 	constructor(options = {}){
 		options = options || {}
+
+		this.updatables = []
 
 		this.three = {
 			scene: null,
@@ -31,7 +35,38 @@ class World
 		controls && controls.update()
 		stats && stats.update()
 
+		this.tick()
+
 		renderer.render(scene, camera)
+	}
+
+	animate(){
+		const { scene, camera, renderer, controls, stats } = this.three
+
+		renderer.setAnimationLoop(() => {
+			// .getDelta will tell us how much time has passed since the last 
+			// time we called .getDelta
+			const delta = clock.getDelta()
+
+			console.log(
+				`The last frame rendered in ${delta * 1000} milliseconds`
+			)
+
+			controls && controls.update()
+			stats && stats.update()
+
+			renderer.render(scene, camera)	
+		})
+	}
+
+	tick(){
+		const delta = clock.getDelta() * 1000
+
+		if ( this.updatables.length ){
+			this.updatables.forEach(object => {
+				object.tick(delta)
+			})
+		}
 	}
 
 	createScene(){
@@ -51,6 +86,10 @@ class World
 
 		this.three.camera = camera
 		this.three.scene.add(camera)
+
+		camera.tick = () => {
+			// camera.position.z += 0.1
+		}
 	}
 
 	createRenderer(){
@@ -141,7 +180,6 @@ class World
 		controls && controls.dispose()
 	}
 
-
 	addHelper(){
 		this.addAxesHelper()
 		this.addGridHelper()
@@ -171,6 +209,14 @@ class World
 		const material = new THREE.MeshBasicMaterial()
 		const cube = new THREE.Mesh(geometry, material)
 
+		cube.tick = (delta = 10) => {
+			// cube.position.x += 0.01 * delta
+			// cube.position.z += 0.01 * delta
+
+			// cube.rotation.y += 6 * ( Math.PI / 180 )
+			cube.rotation.y += 0.6 * ( Math.PI / 180 )
+		}
+
 		return cube
 	}
 
@@ -179,7 +225,7 @@ class World
 		const material = new THREE.MeshBasicMaterial()
 		const sphere = new THREE.Mesh(geometry, material)
 
-		return sphere		
+		return sphere
 	}
 
 	onWindowResize(){

@@ -1,10 +1,10 @@
 function init() {
-	const world = new World({
-		helper: true,
-	})
+	const world = new World()
+
 	const { scene } = world.three
 
 	const cube = world.createCube()
+	
 	cube.position.x = 2
 	cube.position.y = 4
 	cube.position.z = 6
